@@ -10,9 +10,12 @@ import android.util.Log;
 
 public class LocationCheckerService extends IntentService {
     static String SERVICE_NAME="LocationAttributeCheckerService";
+    static boolean isProceed=true;
 
-    private String CHANNEL_ID = "Main channel";
-    int NOTIFICATION_ID = 37111;
+    private String MAIN_CHANNEL_ID = "Main notify channel";
+    private String CHANNEL_ID = "Notify channel";
+    int MAIN_NOTIFICATION_ID = 37111;
+    int NOTIFICATION_ID = 37112;
 
     public LocationCheckerService() {
         super(SERVICE_NAME);
@@ -20,16 +23,17 @@ public class LocationCheckerService extends IntentService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
         Log.d(SERVICE_NAME, "Running "+SERVICE_NAME);
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, MAIN_CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setContentTitle("Location attribute checker")
+                .setContentTitle(MainActivity.APP_NAME)
                 .setContentText("The service is run")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        startForeground(NOTIFICATION_ID, mBuilder.build());
-
+        startForeground(MAIN_NOTIFICATION_ID, mBuilder.build());
         return Service.START_NOT_STICKY;
     }
 
@@ -39,29 +43,40 @@ public class LocationCheckerService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-//        function();
+    public void onDestroy()
+    {
+        isProceed=false;
     }
 
-    protected void function(){
-        while(true)
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        if(intent!=null)
+        Log.d(SERVICE_NAME, "onHandleIntent called");
+        checkAttributes();
+    }
+
+    protected void checkAttributes(){
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setContentTitle(MainActivity.APP_NAME)
+                .setContentText("Test content")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        while(isProceed)
         {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
-                    .setContentTitle("Test title")
-                    .setContentText("Test content")
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
             // NOTIFICATION_ID is a unique int for each notification that you must define
             notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
         }
+
+        notificationManager.cancelAll();
+        isProceed=true;
     }
 }
