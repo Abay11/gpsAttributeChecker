@@ -16,9 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".AppService">
-            <!--android:icon="@drawable/icon"-->
-            <!--android:label="@string/service_name">-->
+        <service android:name=".LocationCheckerService">
+            android:icon="@drawable/icon"
+            android:label="@string/service_name">
         </service>
     </application>
 
