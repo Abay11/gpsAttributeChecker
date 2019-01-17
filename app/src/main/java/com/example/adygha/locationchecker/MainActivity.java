@@ -1,15 +1,12 @@
 package com.example.adygha.locationchecker;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,7 +16,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     static String APP_NAME="Location attribute checker";
@@ -67,21 +63,25 @@ public class MainActivity extends AppCompatActivity {
         Log.d(APP_NAME, "Check clicked");
         String dir="sdcard/PhotoFolder/";
 
-//        File file = lastFileModified(path);
         ArrayList<String> notTagged=new ArrayList<>();
         File[] files=getFileList(dir);
 
-
-        for(File f : files)        {
+        String res=new String();
+        for(File f : files)
+        {
+            if(!hasLocationTag(f.getAbsolutePath()))
             {
-                if(!hasLocationTag(f.getAbsolutePath()))
-                    notTagged.add(f.getName());
+                if(!res.isEmpty()) res+="\n";
+                res += f.getName();
             }
         }
 
-        System.out.println("Not tagged\n");
-        for (String f: notTagged)
-            System.out.println(f);
+        if(res.isEmpty())
+            res+="There are no untagged photos";
+
+        AlertDialog.Builder popupBuilder = new AlertDialog.Builder(this);
+        popupBuilder.setMessage(res);
+        popupBuilder.show();
     }
 
     public boolean isServiceRunning()

@@ -1,4 +1,3 @@
 <resources>
     <string name="app_name">Location Attribute Checker</string>
-    <string name="service_name">LocationCheckerService</string>
 </resources>
