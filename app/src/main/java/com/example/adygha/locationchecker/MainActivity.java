@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.ExifInterface;
 import android.os.Bundle;
+import android.support.v4.widget.DirectedAcyclicGraph;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
@@ -19,12 +21,16 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     static String APP_NAME="Location attribute checker";
+    static String DIRECTORY="sdcard/DCIM/Camera MX/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setButtonsState(isServiceRunning());
+
+        EditText directory=(EditText)findViewById(R.id.editText);
+        directory.setText(DIRECTORY);
     }
 
     @Override
@@ -38,12 +44,23 @@ public class MainActivity extends AppCompatActivity {
     {
         Log.d(APP_NAME, "Start clicked");
         Intent intent = new Intent(this, LocationCheckerService.class);
-        startService(intent);
 
-        boolean isRunningState=true;
-        setButtonsState(isRunningState);
+        String dirPath=((EditText)findViewById(R.id.editText)).getText().toString();
+        if(isCorrectDir(dirPath)) {
+//            intent.putExtra("DIR_PATH", dirPath);
+            DIRECTORY=dirPath;
+            startService(intent);
+            boolean isRunningState=true;
+            setButtonsState(isRunningState);
 
-        Toast.makeText(this, "The service run", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "The service run", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            Toast.makeText(this, "The input name is not directory or is not exists", Toast.LENGTH_SHORT).show();
+        }
+
+
     }
 
     public void stopServiceClicked(View view)
@@ -61,10 +78,19 @@ public class MainActivity extends AppCompatActivity {
     public void checkPhotosClicked(View view)
     {
         Log.d(APP_NAME, "Check clicked");
-        String dir="sdcard/PhotoFolder/";
+        String dirPath=((EditText) findViewById(R.id.editText)).getText().toString();
+
+        System.out.println("dir path: "+dirPath);
+
+
+        if(!isCorrectDir(dirPath))
+        {
+            Toast.makeText(this, "The input name is not directory or is not exists", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         ArrayList<String> notTagged=new ArrayList<>();
-        File[] files=getFileList(dir);
+        File[] files=getFileList(dirPath);
 
         String res=new String();
         for(File f : files)
@@ -129,18 +155,24 @@ public class MainActivity extends AppCompatActivity {
         return files;
     }
 
-    public boolean hasLocationTag(String fileName)
+    public static boolean hasLocationTag(String fullFileName)
     {
         try {
-            ExifInterface exifInterface = new ExifInterface(fileName);
+            ExifInterface exifInterface = new ExifInterface(fullFileName);
             String latitude=exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
             if (latitude==null)
                 return false;
-            else return true;
+            else
+                return true;
         }catch (IOException e)
         {
-            Toast.makeText(this,e.toString(),Toast.LENGTH_LONG).show();
             return false;
         }
+    }
+
+    public static boolean isCorrectDir(String path)
+    {
+        File selectedDir=new File(path);
+        return selectedDir.exists() && selectedDir.isDirectory();
     }
 }
