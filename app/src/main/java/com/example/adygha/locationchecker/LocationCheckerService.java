@@ -66,7 +66,8 @@ public class LocationCheckerService extends IntentService {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher_round)
                 .setContentTitle(MainActivity.APP_NAME)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setDefaults(Notification.DEFAULT_SOUND);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
