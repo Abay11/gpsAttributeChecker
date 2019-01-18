@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<String> notTagged=new ArrayList<>();
         File[] files=getFileList(dirPath);
 
+        int untaggedCount=0;
         String res=new String();
         for(File f : files)
         {
@@ -99,11 +100,16 @@ public class MainActivity extends AppCompatActivity {
             {
                 if(!res.isEmpty()) res+="\n";
                 res += f.getName();
+
+                ++untaggedCount;
             }
         }
 
+        String correctPhotoWord = untaggedCount>1?" photos ": " photo ";
         if(res.isEmpty())
             res+="There are no untagged photos";
+        else
+            res=Integer.toString(untaggedCount) + correctPhotoWord + "from " +  Integer.toString(files.length) + " untagged:\n" + res;
 
         AlertDialog.Builder popupBuilder = new AlertDialog.Builder(this);
         popupBuilder.setMessage(res);
@@ -148,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         File fl = new File(dir);
         File[] files = fl.listFiles(new FileFilter() {
             public boolean accept(File file) {
-                return file.isFile();
+                return file.isFile() && (file.getName().endsWith("jpg") || file.getName().endsWith("jpeg"));
             }
         });
 
