@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.media.ExifInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.DirectedAcyclicGraph;
 import android.support.v7.app.AppCompatActivity;
@@ -43,13 +44,22 @@ public class MainActivity extends AppCompatActivity {
     public void startServiceClicked(View view)
     {
         Log.d(APP_NAME, "Start clicked");
-        Intent intent = new Intent(this, LocationCheckerService.class);
+
 
         String dirPath=((EditText)findViewById(R.id.editText)).getText().toString();
         if(isCorrectDir(dirPath)) {
-//            intent.putExtra("DIR_PATH", dirPath);
             DIRECTORY=dirPath;
-            startService(intent);
+
+            Intent serviceIntent = new Intent(this, LocationCheckerService.class);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                startForegroundService(serviceIntent);
+            }
+            else
+            {
+                startService(serviceIntent);
+            }
+
             boolean isRunningState=true;
             setButtonsState(isRunningState);
 
@@ -59,8 +69,6 @@ public class MainActivity extends AppCompatActivity {
         {
             Toast.makeText(this, "The input name is not directory or is not exists", Toast.LENGTH_SHORT).show();
         }
-
-
     }
 
     public void stopServiceClicked(View view)

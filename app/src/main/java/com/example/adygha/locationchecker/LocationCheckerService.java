@@ -2,9 +2,13 @@ package com.example.adygha.locationchecker;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -29,19 +33,52 @@ public class LocationCheckerService extends IntentService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(SERVICE_NAME, "Running "+SERVICE_NAME);
         super.onStartCommand(intent, flags, startId);
 
-        Log.d(SERVICE_NAME, "Running "+SERVICE_NAME);
+        return Service.START_NOT_STICKY;
+    }
+
+    @Override
+    public void onCreate()
+    {
+        super.onCreate();
 
         CHECKING_DIRECTORY = MainActivity.DIRECTORY;
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, MAIN_CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setContentTitle(MainActivity.APP_NAME)
+
+        NotificationCompat.Builder notificationBuilder;
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            Log.d(SERVICE_NAME, "OREO VERSION");
+
+            NotificationChannel channel = new NotificationChannel(MAIN_CHANNEL_ID, SERVICE_NAME+" CHANNEL",
+                    NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription(SERVICE_NAME + " channel");
+
+            notificationManager.createNotificationChannel(channel);
+
+            notificationBuilder = new NotificationCompat.Builder(this, MAIN_CHANNEL_ID);
+
+            notificationBuilder
+                    .setContentTitle(MainActivity.APP_NAME)
+                    .setContentText(CHECKING_DIRECTORY + " is checking")
+                    .setSmallIcon(R.mipmap.ic_launcher_round);
+
+            startForeground(MAIN_NOTIFICATION_ID, notificationBuilder.build());
+        }
+        else
+        {
+            Log.d(SERVICE_NAME, "NOT OREO VERSION");
+
+            notificationBuilder = new NotificationCompat.Builder(this)
+                .setContentTitle(SERVICE_NAME)
                 .setContentText("Checking " + CHECKING_DIRECTORY)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        startForeground(MAIN_NOTIFICATION_ID, mBuilder.build());
-        return Service.START_NOT_STICKY;
+            startForeground(MAIN_NOTIFICATION_ID, notificationBuilder.build());
+        }
     }
 
     @Override
@@ -53,6 +90,9 @@ public class LocationCheckerService extends IntentService {
     public void onDestroy()
     {
         isProceed=false;
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.cancelAll();
     }
 
     @Override
