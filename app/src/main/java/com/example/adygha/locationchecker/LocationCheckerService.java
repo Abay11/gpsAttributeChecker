@@ -53,7 +53,7 @@ public class LocationCheckerService extends IntentService {
         {
             Log.d(SERVICE_NAME, "OREO VERSION");
 
-            NotificationChannel channel = new NotificationChannel(MAIN_CHANNEL_ID, SERVICE_NAME+" CHANNEL",
+            NotificationChannel channel = new NotificationChannel(MAIN_CHANNEL_ID, SERVICE_NAME + " CHANNEL",
                     NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription(SERVICE_NAME + " channel");
 
@@ -63,7 +63,7 @@ public class LocationCheckerService extends IntentService {
 
             notificationBuilder
                     .setContentTitle(MainActivity.APP_NAME)
-                    .setContentText(CHECKING_DIRECTORY + " is checking")
+                    .setContentText("Проверяется: " + CHECKING_DIRECTORY)
                     .setSmallIcon(R.mipmap.ic_launcher_round);
 
             startForeground(MAIN_NOTIFICATION_ID, notificationBuilder.build());
@@ -74,7 +74,7 @@ public class LocationCheckerService extends IntentService {
 
             notificationBuilder = new NotificationCompat.Builder(this)
                 .setContentTitle(SERVICE_NAME)
-                .setContentText("Checking " + CHECKING_DIRECTORY)
+                .setContentText("Проверяется: " + CHECKING_DIRECTORY)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
             startForeground(MAIN_NOTIFICATION_ID, notificationBuilder.build());
@@ -126,10 +126,7 @@ public class LocationCheckerService extends IntentService {
             if (modifiedFile != null) {
                 modifiedFileName = modifiedFile.getName();
                 if (!(prevFileName.equals(modifiedFileName)) && !MainActivity.hasLocationTag(modifiedFile.getAbsolutePath())) {
-                    System.out.println("Modified name: " + modifiedFileName);
-                    System.out.println("Priv name: " + prevFileName);
-
-                    builder.setContentText(modifiedFileName + " has not GPS tags");
+                    builder.setContentText(modifiedFileName + " не имеет GPS меток");
                     notificationManager.notify(NOTIFICATION_ID, builder.build());
                 }
                 prevFileName = modifiedFileName;

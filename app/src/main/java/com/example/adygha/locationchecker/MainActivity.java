@@ -63,11 +63,11 @@ public class MainActivity extends AppCompatActivity {
             boolean isRunningState=true;
             setButtonsState(isRunningState);
 
-            Toast.makeText(this, "The service run", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Служба запущена", Toast.LENGTH_SHORT).show();
         }
         else
         {
-            Toast.makeText(this, "The input name is not directory or is not exists", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Указанное имя не является папкой или не существует", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         boolean isRunningState=false;
         setButtonsState(isRunningState);
 
-        Toast.makeText(this, "The service stopped", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Служба остановлена", Toast.LENGTH_SHORT).show();
     }
 
     public void checkPhotosClicked(View view)
@@ -88,12 +88,9 @@ public class MainActivity extends AppCompatActivity {
         Log.d(APP_NAME, "Check clicked");
         String dirPath=((EditText) findViewById(R.id.editText)).getText().toString();
 
-        System.out.println("dir path: "+dirPath);
-
-
         if(!isCorrectDir(dirPath))
         {
-            Toast.makeText(this, "The input name is not directory or is not exists", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Указанное имя не является папкой или не существует", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -113,11 +110,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        String correctPhotoWord = untaggedCount>1?" photos ": " photo ";
         if(res.isEmpty())
-            res+="There are no untagged photos";
+            res+="Не найдено неотмеченных фото";
         else
-            res=Integer.toString(untaggedCount) + correctPhotoWord + "from " +  Integer.toString(files.length) + " untagged:\n" + res;
+            res="У " + Integer.toString(untaggedCount) + " из " +  Integer.toString(files.length) + " фото нет GPS меток:\n" + res;
 
         AlertDialog.Builder popupBuilder = new AlertDialog.Builder(this);
         popupBuilder.setMessage(res);

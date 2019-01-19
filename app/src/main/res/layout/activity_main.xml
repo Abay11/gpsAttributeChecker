@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:hint="Example: sdcard/Folder"
+            android:hint="Пример: sdcard/Folder"
             android:inputType="textPersonName" />
 
         <Button
@@ -33,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="startServiceClicked"
-            android:text="Start the service"
+            android:text="Запуск службы"
             tools:layout_editor_absoluteX="49dp"
             tools:layout_editor_absoluteY="215dp" />
 
@@ -42,13 +42,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="stopServiceClicked"
-            android:text="Stop the service" />
+            android:text="Остановка службы" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="checkPhotosClicked"
-            android:text="check photos" />
+            android:text="Проверить папку" />
 
     </LinearLayout>
 
