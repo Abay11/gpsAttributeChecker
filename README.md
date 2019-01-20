@@ -1,4 +1,4 @@
-# Location attribute Checker
+# Location Attribute Checker
 
 Описание: Программа позволяет проверять фото в указанной папке на наличие GPS меток.
 
