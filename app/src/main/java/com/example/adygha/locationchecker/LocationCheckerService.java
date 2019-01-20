@@ -96,9 +96,10 @@ public class LocationCheckerService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if(intent!=null)
-        Log.d(SERVICE_NAME, "onHandleIntent called");
-        checkAttributes();
+        if(intent!=null) {
+            Log.d(SERVICE_NAME, "onHandleIntent called");
+            checkAttributes();
+        }
     }
 
     protected void checkAttributes(){
