@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         FileListerDialog fileListerDialog = FileListerDialog.createFileListerDialog(this);
-        fileListerDialog.setDefaultDir("/sdcard/");
+        fileListerDialog.setDefaultDir(DEFAULT_DIRECTORY);
         fileListerDialog.setFileFilter(FileListerDialog.FILE_FILTER.DIRECTORY_ONLY);
         fileListerDialog.setOnFileSelectedListener(new OnFileSelectedListener() {
             @Override
