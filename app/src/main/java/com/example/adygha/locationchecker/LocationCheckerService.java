@@ -19,8 +19,7 @@ public class LocationCheckerService extends IntentService {
     static String SERVICE_NAME="LocationAttributeCheckerService";
     static boolean isProceed=true;
     static int DELAY=5000;
-    private String MAIN_CHANNEL_ID = "Main notify channel";
-    private String CHANNEL_ID = "Notify channel";
+    private String CHANNEL_ID = "Main notify channel";
     int MAIN_NOTIFICATION_ID = 37111;
     int NOTIFICATION_ID = 37112;
     private String CHECKING_DIRECTORY;
@@ -52,13 +51,13 @@ public class LocationCheckerService extends IntentService {
         {
             Log.d(SERVICE_NAME, "OREO VERSION");
 
-            NotificationChannel channel = new NotificationChannel(MAIN_CHANNEL_ID, SERVICE_NAME + " CHANNEL",
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, SERVICE_NAME + " FOREGROUND CHANNEL",
                     NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription(SERVICE_NAME + " channel");
+            channel.setDescription(SERVICE_NAME + "foreground channel");
 
             notificationManager.createNotificationChannel(channel);
 
-            notificationBuilder = new NotificationCompat.Builder(this, MAIN_CHANNEL_ID);
+            notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID);
 
             notificationBuilder
                     .setContentTitle(MainActivity.APP_NAME)
@@ -112,7 +111,7 @@ public class LocationCheckerService extends IntentService {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
         String prevFileName=new String();
-        String modifiedFileName=new String();
+        String modifiedFileName;
         File modifiedFile;
         while(isProceed) {
             try {
