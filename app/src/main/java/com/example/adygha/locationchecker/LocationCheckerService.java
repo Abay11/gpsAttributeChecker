@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -44,7 +43,7 @@ public class LocationCheckerService extends IntentService {
     {
         super.onCreate();
 
-        CHECKING_DIRECTORY = MainActivity.DIRECTORY;
+        CHECKING_DIRECTORY = MainActivity.CURRENT_DIRECTORY;
 
         NotificationCompat.Builder notificationBuilder;
 

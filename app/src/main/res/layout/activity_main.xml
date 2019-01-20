@@ -24,9 +24,11 @@
             android:id="@+id/editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:editable="?android:attr/windowOverscan"
             android:ems="10"
             android:hint="Пример: sdcard/Folder"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            android:onClick="selectDirectoryClicked" />
 
         <Button
             android:id="@+id/startButton"

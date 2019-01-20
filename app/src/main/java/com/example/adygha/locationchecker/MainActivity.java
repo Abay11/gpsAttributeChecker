@@ -9,10 +9,8 @@ import android.content.pm.PackageManager;
 import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
-import android.sax.StartElementListener;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.DirectedAcyclicGraph;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -25,9 +23,14 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import yogesh.firzen.filelister.FileListerDialog;
+import yogesh.firzen.filelister.OnFileSelectedListener;
+
 public class MainActivity extends AppCompatActivity {
     static String APP_NAME="Location attribute checker";
-    static String DIRECTORY="sdcard/DCIM/Camera MX/";
+    static final String DEFAULT_DIRECTORY = "sdcard/DCIM/Camera MX/";
+    static String CURRENT_DIRECTORY = DEFAULT_DIRECTORY;
+
     static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE=1;
 
     @Override
@@ -37,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
         setButtonsState(isServiceRunning());
 
         EditText directory=(EditText)findViewById(R.id.editText);
-        directory.setText(DIRECTORY);
-
+        directory.setText(DEFAULT_DIRECTORY);
+        directory.setFocusable(false);
     }
 
     @Override
@@ -63,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         else {
             String dirPath = ((EditText) findViewById(R.id.editText)).getText().toString();
             if (isCorrectDir(dirPath)) {
-                DIRECTORY = dirPath;
+                CURRENT_DIRECTORY = dirPath;
 
                 Intent serviceIntent = new Intent(this, LocationCheckerService.class);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -140,6 +143,28 @@ public class MainActivity extends AppCompatActivity {
             popupBuilder.show();
         }
 
+    }
+
+    public void selectDirectoryClicked(View view)
+    {
+        Log.d(APP_NAME, "Select directory clicked");
+
+
+        FileListerDialog fileListerDialog = FileListerDialog.createFileListerDialog(this);
+        fileListerDialog.setDefaultDir("/sdcard/");
+        fileListerDialog.setFileFilter(FileListerDialog.FILE_FILTER.DIRECTORY_ONLY);
+        fileListerDialog.setOnFileSelectedListener(new OnFileSelectedListener() {
+            @Override
+            public void onFileSelected(File file, String path) {
+                //your code here
+                CURRENT_DIRECTORY = file.getPath();
+                EditText editor=(EditText)findViewById(R.id.editText);
+                editor.setText(CURRENT_DIRECTORY);
+                Log.d(APP_NAME, "Dir picked");
+            }
+        });
+
+        fileListerDialog.show();
     }
 
     @Override
