@@ -1,12 +1,17 @@
 package com.example.adygha.locationchecker;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.sax.StartElementListener;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DirectedAcyclicGraph;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -23,6 +28,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     static String APP_NAME="Location attribute checker";
     static String DIRECTORY="sdcard/DCIM/Camera MX/";
+    static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE=1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         EditText directory=(EditText)findViewById(R.id.editText);
         directory.setText(DIRECTORY);
+
     }
 
     @Override
@@ -45,31 +52,36 @@ public class MainActivity extends AppCompatActivity {
     {
         Log.d(APP_NAME, "Start clicked");
 
-
-        String dirPath=((EditText)findViewById(R.id.editText)).getText().toString();
-        if(isCorrectDir(dirPath)) {
-            DIRECTORY=dirPath;
-
-            Intent serviceIntent = new Intent(this, LocationCheckerService.class);
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            {
-                startForegroundService(serviceIntent);
-            }
-            else
-            {
-                startService(serviceIntent);
-            }
-
-            boolean isRunningState=true;
-            setButtonsState(isRunningState);
-
-            Toast.makeText(this, "Служба запущена", Toast.LENGTH_SHORT).show();
-        }
-        else
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED)
         {
-            Toast.makeText(this, "Указанное имя не является папкой или не существует", Toast.LENGTH_SHORT).show();
+            Log.d(APP_NAME, "READING the external storage is not granted");
+            ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        }
+        else {
+            String dirPath = ((EditText) findViewById(R.id.editText)).getText().toString();
+            if (isCorrectDir(dirPath)) {
+                DIRECTORY = dirPath;
+
+                Intent serviceIntent = new Intent(this, LocationCheckerService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent);
+                } else {
+                    startService(serviceIntent);
+                }
+
+                boolean isRunningState = true;
+                setButtonsState(isRunningState);
+
+                Toast.makeText(this, "Служба запущена", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Указанное имя не является папкой или не существует", Toast.LENGTH_SHORT).show();
+            }
         }
     }
+
 
     public void stopServiceClicked(View view)
     {
@@ -86,39 +98,72 @@ public class MainActivity extends AppCompatActivity {
     public void checkPhotosClicked(View view)
     {
         Log.d(APP_NAME, "Check clicked");
-        String dirPath=((EditText) findViewById(R.id.editText)).getText().toString();
 
-        if(!isCorrectDir(dirPath))
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED)
         {
-            Toast.makeText(this, "Указанное имя не является папкой или не существует", Toast.LENGTH_SHORT).show();
-            return;
+            Log.d(APP_NAME, "READING the external storage is not granted");
+            ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        }
+        else {
+
+            String dirPath = ((EditText) findViewById(R.id.editText)).getText().toString();
+
+            if (!isCorrectDir(dirPath)) {
+                Toast.makeText(this, "Указанное имя не является папкой или не существует", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            ArrayList<String> notTagged = new ArrayList<>();
+            File[] files = getFileList(dirPath);
+
+            int untaggedCount = 0;
+            String res = new String();
+            for (File f : files) {
+                if (!hasLocationTag(f.getAbsolutePath())) {
+                    if (!res.isEmpty()) res += "\n";
+                    res += f.getName();
+
+                    ++untaggedCount;
+                }
+            }
+
+            if (res.isEmpty())
+                res += "Не найдено неотмеченных фото";
+            else
+                res = "У " + Integer.toString(untaggedCount) + " из " + Integer.toString(files.length) + " фото нет GPS меток:\n" + res;
+
+            AlertDialog.Builder popupBuilder = new AlertDialog.Builder(this);
+            popupBuilder.setMessage(res);
+            popupBuilder.show();
         }
 
-        ArrayList<String> notTagged=new ArrayList<>();
-        File[] files=getFileList(dirPath);
+    }
 
-        int untaggedCount=0;
-        String res=new String();
-        for(File f : files)
-        {
-            if(!hasLocationTag(f.getAbsolutePath()))
-            {
-                if(!res.isEmpty()) res+="\n";
-                res += f.getName();
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(APP_NAME, "Permission granted");
 
-                ++untaggedCount;
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    Log.d(APP_NAME, "Permission denied");
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
             }
         }
-
-        if(res.isEmpty())
-            res+="Не найдено неотмеченных фото";
-        else
-            res="У " + Integer.toString(untaggedCount) + " из " +  Integer.toString(files.length) + " фото нет GPS меток:\n" + res;
-
-        AlertDialog.Builder popupBuilder = new AlertDialog.Builder(this);
-        popupBuilder.setMessage(res);
-        popupBuilder.show();
     }
+
 
     public boolean isServiceRunning()
     {
