@@ -15,12 +15,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import yogesh.firzen.filelister.FileListerDialog;
@@ -120,7 +124,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             ArrayList<String> notTagged = new ArrayList<>();
-            File[] files = getFileList(dirPath);
+
+            boolean isSubdirsIncluded = ((CheckBox)findViewById(R.id.checkBox)).isChecked();
+            File[] files = getFileList(dirPath, isSubdirsIncluded);
 
             int untaggedCount = 0;
             String res = new String();
@@ -143,6 +149,12 @@ public class MainActivity extends AppCompatActivity {
             popupBuilder.show();
         }
 
+    }
+
+    public ArrayList<String> getUntaggedPhotos(String dir)
+    {
+
+        return null;
     }
 
     public void selectDirectoryClicked(View view)
@@ -189,7 +201,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     public boolean isServiceRunning()
     {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -209,8 +220,8 @@ public class MainActivity extends AppCompatActivity {
         stop.setEnabled(state);
     }
 
-    public static File lastFileModified(String dir) {
-        File[] files = getFileList(dir);
+    public static File lastFileModified(String dir, boolean isDirsIncluded) {
+        File[] files = getFileList(dir, isDirsIncluded);
 
         long lastMod = Long.MIN_VALUE;
         File choice = null;
@@ -223,14 +234,42 @@ public class MainActivity extends AppCompatActivity {
         return choice;
     }
 
-    public static File[] getFileList(String dir)
+    public static File[] getFileList(String dir, final boolean isDirsIncluded)
     {
         File fl = new File(dir);
-        File[] files = fl.listFiles(new FileFilter() {
+        File[] files;
+
+        files = fl.listFiles(new FileFilter() {
             public boolean accept(File file) {
-                return file.isFile() && (file.getName().endsWith("jpg") || file.getName().endsWith("jpeg"));
+                return (file.isFile() && (file.getName().endsWith("jpg")
+                        || file.getName().endsWith("jpeg")));
             }
         });
+
+        if(isDirsIncluded) {
+            File[] dirs;
+            dirs = fl.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    return pathname.isDirectory();
+                }
+            });
+
+            for (File f : dirs) {
+                File[] subDirFiles = getFileList(f.getAbsolutePath(), isDirsIncluded);
+                File[] appendLists = new File[subDirFiles.length + files.length];
+
+                for (int i = 0; i < files.length; ++i) {
+                    appendLists[i] = files[i];
+                }
+
+                for (int i = 0; i < subDirFiles.length; ++i) {
+                    appendLists[files.length + i] = subDirFiles[i];
+                }
+
+                files = appendLists;
+            }
+        }
 
         return files;
     }

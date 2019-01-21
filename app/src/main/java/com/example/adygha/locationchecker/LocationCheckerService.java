@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
+import android.widget.CheckBox;
 
 import java.io.File;
 
@@ -121,7 +122,7 @@ public class LocationCheckerService extends IntentService {
             }
 
 
-            modifiedFile = MainActivity.lastFileModified(CHECKING_DIRECTORY);
+            modifiedFile = MainActivity.lastFileModified(CHECKING_DIRECTORY, true);
             if (modifiedFile != null) {
                 modifiedFileName = modifiedFile.getName();
                 if (!(prevFileName.equals(modifiedFileName)) && !MainActivity.hasLocationTag(modifiedFile.getAbsolutePath())) {
